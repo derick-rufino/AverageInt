@@ -491,6 +491,21 @@ section.rankingCard {
   grid-column: 2/3;
   grid-row: 1/5;
   border-color: var(--feedback-warning);
+  overflow-y: hidden;
+}
+
+div.tab-content {
+  overflow-y: scroll;
+  position: relative;
+  &::-webkit-scrollbar {
+    width: 4px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-primary);
+    border-radius: var(--radius-sm);
+  }
 }
 
 section.gameMode-card {
@@ -524,7 +539,7 @@ section i.fa-xmark:hover {
 
 /* Botões de modo - minimalistas */
 button.gameModeOption {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width-thick) solid var(--border-primary);
   border-radius: var(--radius-base);
   padding: 8px 10px;
@@ -642,7 +657,7 @@ a#developer-card {
 
 /* Hover effect - mais destaque */
 a#developer-card:hover {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border-color: var(--border-primary);
   transform: translateY(-2px);
   opacity: 1;
@@ -760,7 +775,7 @@ div#tutorial-card .tutorial-tabs {
 
 div#tutorial-card .tutorial-tab-btn {
   flex: 1;
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
@@ -836,7 +851,7 @@ div#tutorial-card .tutorial-header h3 {
 }
 
 div#tutorial-card .tutorial-header .close-btn {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
   border-radius: var(--radius-base);
   padding: 0.5rem;
@@ -989,7 +1004,7 @@ div#tutorial-card .cost-grid {
 }
 
 div#tutorial-card .cost-item {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
   border-radius: var(--radius-sm);
   padding: 0.5rem;
@@ -1030,7 +1045,7 @@ div#tutorial-card .cost-item .mode-name.hard {
 
 /* Garantir que os cost-item mantenham fundo padrão */
 div#tutorial-card .cost-item {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
   border-radius: var(--radius-sm);
   padding: 0.5rem;
@@ -1045,7 +1060,7 @@ div#tutorial-card .cost-item {
 div#tutorial-card .mode-description {
   margin-top: 0.75rem;
   padding: 0.75rem;
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border-radius: var(--radius-base);
   border-left: 4px solid var(--interactive-primary);
   font-size: var(--font-size-sm);
@@ -1054,7 +1069,7 @@ div#tutorial-card .mode-description {
 }
 
 div#tutorial-card .mode-badge {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
   border-radius: var(--radius-base);
   padding: 0.5rem;
@@ -1066,30 +1081,30 @@ div#tutorial-card .mode-badge {
 /* Cores específicas dos mode-badge no tutorial */
 div#tutorial-card .mode-badge.easy {
   color: #22c55e;
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
 }
 
 div#tutorial-card .mode-badge.normal {
   color: #3b82f6;
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
 }
 
 div#tutorial-card .mode-badge.medium {
   color: #f59e0b;
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
 }
 
 div#tutorial-card .mode-badge.hard {
   color: #ef4444;
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
 }
 
 div#tutorial-card .highlight {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   padding: 0.75rem;
   border-radius: var(--radius-base);
   border-left: 4px solid var(--feedback-warning);
@@ -1181,7 +1196,7 @@ div#tutorial-card::backdrop {
 
 /* Cards de pontuação */
 .pointsCard {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width-thick) solid var(--border-primary);
   border-radius: var(--radius-base);
   padding: 8px;
@@ -1407,7 +1422,7 @@ div#tutorial-card::backdrop {
 
 .tab-btn {
   flex: 1;
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
   border-radius: var(--radius-sm);
   padding: 6px 8px;
@@ -1470,7 +1485,7 @@ div#tutorial-card::backdrop {
 
 /* Item de ranking */
 .rank-item {
-  background: var(--bg-terciary);
+  background: var(--bg-tertiary);
   border: var(--border-width) solid var(--border-primary);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
