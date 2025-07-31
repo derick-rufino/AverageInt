@@ -108,8 +108,8 @@ body {
 
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  min-height: 100vh;
+  flex-wrap: nowrap;
+  max-height: 100dvh;
 }
 
 h1,

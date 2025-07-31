@@ -1241,8 +1241,13 @@ div#tutorial-card::backdrop {
 }
 
 /* Sem animações - apenas feedback visual básico */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
 
-/* ========== DESKTOP SPECIFIC STYLES ========== */
 @media (min-width: 769px) {
   /* Garantir que o layout desktop funcione corretamente */
   body {
@@ -1261,7 +1266,7 @@ div#tutorial-card::backdrop {
   }
 
   main {
-    height: 84vh;
+    height: 80vh;
     overflow: hidden;
     padding: 16px;
     gap: 16px;
@@ -1481,6 +1486,8 @@ div#tutorial-card::backdrop {
   gap: 6px;
   flex: 1;
   height: 100%;
+  width: stretch;
+  
 }
 
 /* Item de ranking */
