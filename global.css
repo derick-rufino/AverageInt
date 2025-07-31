@@ -110,6 +110,14 @@ body {
   flex-direction: column;
   flex-wrap: nowrap;
   max-height: 100dvh;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+  }
 }
 
 h1,
