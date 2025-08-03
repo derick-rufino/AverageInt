@@ -37,6 +37,80 @@ Multiplayer Local - Funcionalidade Social: @future
 	☐ Modo cooperativo (jogadores se ajudam com dicas)
 	☐ Sistema de desafios entre jogadores locais
 
+INTEGRAÇÃO SUPABASE - BACKEND & AUTENTICAÇÃO: @high
+
+Configuração Inicial do Supabase:
+	☐ Criar projeto no Supabase (região: São Paulo)
+	☐ Configurar variáveis de ambiente (URL e chave anônima)
+	☐ Adicionar biblioteca @supabase/supabase-js via CDN ou npm
+	☐ Criar arquivo supabase-config.js com configuração do cliente
+	☐ Configurar policies de Row Level Security (RLS)
+
+Estrutura do Banco de Dados:
+	☐ Criar tabela `profiles` (extends auth.users com username, display_name, avatar_url)
+	☐ Criar tabela `scores` (user_id, game_mode, points, time_seconds, difficulty, created_at)
+	☐ Criar tabela `user_stats` (total_games, total_points, best_streak, favorite_mode)
+	☐ Criar tabela `achievements` (user_id, achievement_type, unlocked_at)
+	☐ Configurar índices para otimizar consultas de ranking
+	☐ Implementar triggers para atualização automática de estatísticas
+
+Sistema de Autenticação:
+	☐ Criar classe AuthSystem com métodos signUp, signIn, signOut, getCurrentUser
+	☐ Implementar interface de login/registro (modal ou sidebar)
+	☐ Adicionar validação de formulários (email, senha, username único)
+	☐ Implementar sistema de recuperação de senha
+	☐ Criar persistência de sessão do usuário
+	☐ Adicionar botão de logout no header/menu
+	☐ Implementar verificação de email (opcional)
+
+Migração do Sistema Local para Banco:
+	☐ Criar classe DatabaseSystem para substituir StorageSystem
+	☐ Implementar saveScore() com fallback para localStorage
+	☐ Migrar função getGlobalRankings() para consultas SQL
+	☐ Criar getUserHistory() para histórico pessoal
+	☐ Implementar sincronização de dados locais existentes
+	☐ Manter compatibilidade com modo offline (guest)
+
+Interface de Usuário - Autenticação:
+	☐ Criar modal de login/registro responsivo
+	☐ Adicionar indicador de status do usuário (logado/guest)
+	☐ Implementar perfil do usuário (editar username, avatar)
+	☐ Criar tela de estatísticas pessoais
+	☐ Adicionar opção "Jogar como convidado"
+	☐ Implementar feedback visual para ações (loading, erro, sucesso)
+
+Rankings Globais & Sociais:
+	☐ Implementar rankings globais por modo de jogo
+	☐ Criar leaderboards semanais/mensais
+	☐ Adicionar comparação com outros jogadores (percentil)
+	☐ Implementar rankings em tempo real (Supabase Realtime)
+	☐ Criar sistema de conquistas globais
+	☐ Adicionar funcionalidade de buscar/seguir outros jogadores
+
+Recursos Avançados:
+	☐ Implementar sistema de conquistas automáticas
+	☐ Criar notificações para novos recordes
+	☐ Adicionar estatísticas detalhadas (tempo médio, dicas usadas)
+	☐ Implementar sistema de badges/medalhas
+	☐ Criar API para compartilhamento de recordes
+	☐ Adicionar backup automático de progresso
+
+Segurança & Performance:
+	☐ Configurar Rate Limiting para evitar spam
+	☐ Implementar validação servidor-side de pontuações
+	☐ Adicionar detecção de trapaças básica
+	☐ Otimizar consultas com paginação
+	☐ Implementar cache local para rankings
+	☐ Configurar monitoring de erros
+
+Testes & Deploy:
+	☐ Testar autenticação em mobile/desktop
+	☐ Validar sincronização de dados em diferentes cenários
+	☐ Testar modo offline e reconexão
+	☐ Verificar performance com muitos usuários
+	☐ Implementar logs de erro para debugging
+	☐ Configurar backup automático do banco
+
 Backend & Rankings Globais - Expansão Online: @future
 	☐ API backend simples para rankings globais
 	☐ Sistema de nickname para rankings mundiais
