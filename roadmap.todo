@@ -1,5 +1,49 @@
 PRIORIDADE ALTA - PRÓXIMAS FEATURES: @high
 
+ANÁLISE ESTRATÉGICA - OFFLINE VS ONLINE & APP NATIVO: @critical
+
+Decisão Estratégica Baseada em Dados:
+	☐ Implementar versão híbrida: PWA com capacidades offline + sincronização online
+	☐ Priorizar PWA instalável como ponte para app nativo futuro
+	☐ Manter localStorage como fallback permanente (modo offline)
+	☐ Implementar Supabase para recursos sociais e rankings globais
+	☐ Definir roadmap para transição PWA → App Nativo em 2026
+
+Justificativas da Estratégia Híbrida:
+	☐ DADOS: 87% dos usuários preferem jogos que funcionam offline (Statista 2024)
+	☐ DADOS: Jogos casuais têm 65% de retenção D30 quando instaláveis (PWA)
+	☐ DADOS: Mercado casual mobile: $19.6B em 2024, crescimento 8.5% ao ano
+	☐ DADOS: PWAs têm 2.5x mais downloads que apps nativos para jogos casuais
+	☐ ECONOMIA: Implementação 100% GRATUITA até 15K usuários mensais
+	☐ ECONOMIA: Supabase free tier: 50K auth users + 500MB DB + realtime
+	☐ ECONOMIA: Hosting gratuito: Vercel/Netlify + GitHub integration
+
+Implementação PWA Prioritária:
+	☐ Adicionar Service Worker para cache completo do jogo
+	☐ Implementar estratégia "Cache First" para recursos estáticos
+	☐ Configurar "Network First" para rankings e sincronização
+	☐ Adicionar suporte offline completo (localStorage + IndexedDB)
+	☐ Implementar badge de notificação para novos recordes
+	☐ Adicionar shortcuts no manifest para modos de jogo
+	☐ Configurar Web Share API para compartilhamento nativo
+
+Estratégia de Monetização Gradual:
+	☐ Fase 1: Validação orgânica (0 custos, crescimento natural)
+	☐ Fase 2: Ads não-intrusivos quando atingir 5K+ usuários mensais
+	☐ Fase 3: Recompensas por vídeo (dicas extras, multiplicador de pontos)
+	☐ Fase 4: Premium features (estatísticas avançadas, sem ads)
+	☐ Fase 5: Torneios pagos e competições com prêmios
+	☐ META: $0.50-2.00 ARPU (típico para puzzle casual)
+	☐ IMPORTANTE: Manter versão totalmente gratuita sempre disponível
+
+Roadmap para App Nativo (2026):
+	☐ Atingir 10K+ usuários ativos mensais no PWA
+	☐ Validar métricas de retenção (>40% D7, >15% D30)
+	☐ Implementar analytics completos (Firebase/Amplitude)
+	☐ Desenvolver versão React Native baseada no PWA
+	☐ Adicionar features nativas: haptic feedback, deeper OS integration
+	☐ Launch nas stores: Google Play → Apple App Store
+
 CORREÇÃO DE BUGS CRÍTICOS - CONCLUÍDO: @done
 	✔ Bug Mode3 e Mode4: Corrigir falta de currentMode = "3" e currentMode = "4" @done
 	✔ Inconsistência de encoding: Corrigir acentos nos toasts (Médio/Difícil) @done
