@@ -7,17 +7,17 @@
  */
 function updateRankingDisplay() {
   if (!window.StorageSystem) {
-    console.warn('[Rankings] Sistema de storage não disponível');
+    console.warn("[Rankings] Sistema de storage não disponível");
     return;
   }
 
   const rankings = StorageSystem.getRankings();
-  
+
   // Atualizar ranking geral
-  updateRankingTab('general', rankings.general);
-  
+  updateRankingTab("general", rankings.general);
+
   // Atualizar ranking cronometrado
-  updateRankingTab('timed', rankings.timed);
+  updateRankingTab("timed", rankings.timed);
 }
 
 /**
@@ -27,19 +27,20 @@ function updateRankingTab(tabType, rankingData) {
   const tabPanel = document.getElementById(`${tabType}-tab`);
   if (!tabPanel) return;
 
-  const rankingList = tabPanel.querySelector('.ranking-list');
+  const rankingList = tabPanel.querySelector(".ranking-list");
   if (!rankingList) return;
 
   // Limpar conteúdo atual
-  rankingList.innerHTML = '';
+  rankingList.innerHTML = "";
 
   // Se não há dados, mostrar placeholders
   if (!rankingData || rankingData.length === 0) {
     for (let i = 1; i <= 5; i++) {
-      const rankItem = document.createElement('div');
-      rankItem.className = tabType === 'timed' ? 'rank-item timed' : 'rank-item';
-      
-      if (tabType === 'timed') {
+      const rankItem = document.createElement("div");
+      rankItem.className =
+        tabType === "timed" ? "rank-item timed" : "rank-item";
+
+      if (tabType === "timed") {
         rankItem.innerHTML = `
           <span class="rank-position">${i}º</span>
           <span class="rank-points">0 pts</span>
@@ -51,7 +52,7 @@ function updateRankingTab(tabType, rankingData) {
           <span class="rank-points">0 pts</span>
         `;
       }
-      
+
       rankingList.appendChild(rankItem);
     }
     return;
@@ -59,31 +60,55 @@ function updateRankingTab(tabType, rankingData) {
 
   // Exibir dados reais (máximo 5 posições)
   for (let i = 0; i < Math.max(5, rankingData.length); i++) {
-    const rankItem = document.createElement('div');
-    rankItem.className = tabType === 'timed' ? 'rank-item timed' : 'rank-item';
-    
+    const rankItem = document.createElement("div");
+    rankItem.className = tabType === "timed" ? "rank-item timed" : "rank-item";
+
     if (i < rankingData.length) {
       const data = rankingData[i];
-      const modeNames = { "1": "Aprendiz", "2": "Normal", "3": "Médio", "4": "Difícil" };
+      const modeNames = {
+        1: "Aprendiz",
+        2: "Normal",
+        3: "Médio",
+        4: "Difícil",
+      };
       const modeName = modeNames[data.mode] || "Normal";
-      
-      if (tabType === 'timed') {
+
+      // Detectar se é uma sessão com streak
+      const hasStreak = data.streak && data.streak > 1;
+      const streakInfo = hasStreak ? ` (${data.streak}x)` : "";
+
+      if (tabType === "timed") {
+        const timeDisplay = data.sessionTime || data.time || "00:00";
         rankItem.innerHTML = `
           <span class="rank-position">${i + 1}º</span>
-          <span class="rank-points">${data.points} pts</span>
-          <span class="rank-time">${data.time}</span>
+          <span class="rank-points">${data.points} pts${streakInfo}</span>
+          <span class="rank-time">${timeDisplay}</span>
         `;
-        rankItem.title = `Modo: ${modeName} | Data: ${new Date(data.date).toLocaleDateString()}`;
+        let tooltip = `Modo: ${modeName} | Data: ${new Date(
+          data.date
+        ).toLocaleDateString()}`;
+        if (hasStreak) tooltip += ` | Streak: ${data.streak} acertos`;
+        rankItem.title = tooltip;
       } else {
         rankItem.innerHTML = `
           <span class="rank-position">${i + 1}º</span>
-          <span class="rank-points">${data.points} pts</span>
+          <span class="rank-points">${data.points} pts${streakInfo}</span>
         `;
-        rankItem.title = `Modo: ${modeName} | Data: ${new Date(data.date).toLocaleDateString()}`;
+        let tooltip = `Modo: ${modeName} | Data: ${new Date(
+          data.date
+        ).toLocaleDateString()}`;
+        if (hasStreak)
+          tooltip += ` | Streak: ${data.streak} acertos consecutivos`;
+        rankItem.title = tooltip;
+      }
+
+      // Destacar visualmente sessões com streak alto
+      if (hasStreak && data.streak >= 5) {
+        rankItem.classList.add("streak-highlight");
       }
     } else {
       // Posições vazias
-      if (tabType === 'timed') {
+      if (tabType === "timed") {
         rankItem.innerHTML = `
           <span class="rank-position">${i + 1}º</span>
           <span class="rank-points">0 pts</span>
@@ -96,30 +121,55 @@ function updateRankingTab(tabType, rankingData) {
         `;
       }
     }
-    
+
     rankingList.appendChild(rankItem);
   }
 }
 
 /**
  * Salva pontuação no ranking apropriado
+ * Detecta automaticamente se é uma sessão com streak ou pontuação individual
  */
 function saveScoreToRanking(points, mode, timeElapsed = null) {
   if (!window.StorageSystem) {
-    console.warn('[Rankings] Sistema de storage não disponível');
+    console.warn("[Rankings] Sistema de storage não disponível");
     return false;
   }
 
-  const success = StorageSystem.addScore(points, mode, timeElapsed);
-  
+  let success = false;
+
+  // Se há uma sessão ativa, usar o sistema de sessão
+  if (currentSession.isActive && currentSession.streak > 0) {
+    success = StorageSystem.addSessionScore(
+      points,
+      mode,
+      currentSession.streak,
+      timeElapsed
+    );
+
+    if (success) {
+      console.info(
+        `[Rankings] Sessão salva: ${points} pontos, streak ${currentSession.streak}, modo ${mode}`
+      );
+    }
+  } else {
+    // Sistema tradicional para pontuações individuais
+    success = StorageSystem.addScore(points, mode, timeElapsed);
+
+    if (success) {
+      console.info(
+        `[Rankings] Pontuação individual salva: ${points} pontos no modo ${mode}`
+      );
+    }
+  }
+
   if (success) {
     // Atualizar display imediatamente
     updateRankingDisplay();
-    console.info(`[Rankings] Pontuação salva: ${points} pontos no modo ${mode}`);
   } else {
-    console.error('[Rankings] Falha ao salvar pontuação');
+    console.error("[Rankings] Falha ao salvar pontuação");
   }
-  
+
   return success;
 }
 
@@ -130,14 +180,14 @@ function loadGameSettings() {
   if (!window.StorageSystem) return;
 
   const settings = StorageSystem.getSettings();
-  
+
   // Aplicar modo salvo
   if (settings.currentMode && settings.currentMode !== currentMode) {
     currentMode = settings.currentMode;
     updateModeDisplay();
     highlightSelectedMode();
   }
-  
+
   console.info(`[Settings] Configurações carregadas: modo ${currentMode}`);
 }
 
@@ -150,9 +200,9 @@ function saveGameSettings() {
   const settings = {
     currentMode: currentMode,
     soundEnabled: true, // TODO: implementar som se necessário
-    lastPlayed: new Date().toISOString()
+    lastPlayed: new Date().toISOString(),
   };
-  
+
   StorageSystem.saveSettings(settings);
 }
 
@@ -162,8 +212,14 @@ function saveGameSettings() {
 function updatePlayerStatistics(points, wasCorrect) {
   if (!window.StorageSystem) return;
 
-  const stats = StorageSystem.updateGameStatistics(points, currentMode, wasCorrect);
-  console.info(`[Statistics] Stats atualizados: ${stats.totalGames} jogos, ${stats.totalPoints} pontos totais`);
+  const stats = StorageSystem.updateGameStatistics(
+    points,
+    currentMode,
+    wasCorrect
+  );
+  console.info(
+    `[Statistics] Stats atualizados: ${stats.totalGames} jogos, ${stats.totalPoints} pontos totais`
+  );
 }
 
 // ========== END RANKING SYSTEM ==========
@@ -287,6 +343,14 @@ let currentMode = "2"; // modo Normal por padrão
 let pontos = 0;
 let mediaAtual = null;
 let tentativaFeita = false; // utilizado para habilitar e desabilitar o input
+
+// ========== SISTEMA DE STREAK E SESSÃO ==========
+let currentSession = {
+  points: 0, // Pontos acumulados na sessão atual
+  streak: 0, // Sequência de acertos consecutivos
+  isActive: false, // Se há uma sessão ativa
+  startTime: null, // Momento de início da sessão
+};
 
 //Controle do Timer
 let countdownInterval = null;
@@ -813,7 +877,83 @@ function animateNumberDisplays(finalNumbers, duration = 3000) {
   });
 }
 
-// ✅ CORREã‡ãƒO: handleCorrectAnswer no modo difícil com Animação
+// ========== GESTÃO DE SESSÃO E STREAK ==========
+
+/**
+ * Inicia uma nova sessão de pontuação contínua
+ */
+function startNewSession() {
+  currentSession.points = 0;
+  currentSession.streak = 0;
+  currentSession.isActive = true;
+  currentSession.startTime = Date.now();
+
+  // Atualizar display visual
+  updateSessionDisplay();
+
+  console.log("[Session] Nova sessão iniciada");
+}
+
+/**
+ * Finaliza a sessão atual e salva no ranking
+ */
+function endCurrentSession() {
+  if (!currentSession.isActive) return;
+
+  console.log(
+    `[Session] Finalizando sessão: ${currentSession.points} pontos, ${currentSession.streak} streak`
+  );
+
+  // Reset do estado
+  currentSession.points = 0;
+  currentSession.streak = 0;
+  currentSession.isActive = false;
+  currentSession.startTime = null;
+
+  // Reset dos pontos globais (compatibilidade com sistema atual)
+  pontos = 0;
+
+  // Atualizar display
+  updateSessionDisplay();
+}
+
+/**
+ * Atualiza o display visual da sessão atual
+ */
+function updateSessionDisplay() {
+  // Atualizar pontos na tela
+  if (displayPontos) {
+    displayPontos.textContent = currentSession.isActive
+      ? currentSession.points
+      : pontos;
+  }
+
+  // TODO: Adicionar display de streak no futuro
+  // const streakDisplay = document.getElementById("currentStreak");
+  // if (streakDisplay) {
+  //   streakDisplay.textContent = currentSession.streak;
+  // }
+}
+
+/**
+ * Mostra feedback visual do fim da sessão
+ */
+function showSessionEndFeedback(finalPoints, finalStreak) {
+  const message =
+    finalStreak > 1
+      ? `Sessão finalizada! ${finalPoints} pontos com ${finalStreak} acertos consecutivos!`
+      : `Sessão finalizada! ${finalPoints} pontos.`;
+
+  // Usar sistema de mensagem existente
+  if (window.showSuccessMessageWithConfetti) {
+    showSuccessMessageWithConfetti(message);
+  } else if (userMessage) {
+    userMessage.textContent = message;
+    userMessage.style.color = "var(--color-success-base)";
+  }
+}
+
+// ✅ SISTEMA DE STREAK: handleCorrectAnswer reformulado
 function handleCorrectAnswer() {
   // Para o timer se estiver rodando
   let timeElapsed = null;
@@ -821,25 +961,42 @@ function handleCorrectAnswer() {
     // Calcular tempo decorrido no modo difícil
     const secondsElapsed = 60 - parseInt(displayTimer.innerText);
     timeElapsed = StorageSystem.formatTime(secondsElapsed);
-    
+
     clearPreviousTimer(); // Usa a nova Função
     botaoPararTimer.disabled = true; // Desabilita o botão de parar
   }
 
   const pointsEarned = pontosPorAcerto();
-  pontos += pointsEarned;
+
+  // ========== SISTEMA DE STREAK ==========
+  // Iniciar sessão se necessário
+  if (!currentSession.isActive) {
+    startNewSession();
+  }
+
+  // Acumular pontos na sessão (NÃO salvar ainda)
+  currentSession.points += pointsEarned;
+  currentSession.streak++;
+
+  // Atualizar pontos globais para compatibilidade
+  pontos = currentSession.points;
+
+  // Atualizar display visual
+  updateSessionDisplay();
 
   // ✅ PERSISTENCE: Atualizar estatísticas
   updatePlayerStatistics(pointsEarned, true);
 
-  // ✅ PERSISTENCE: Salvar pontuação no ranking (se modo cronometrado, incluir tempo)
-  saveScoreToRanking(pontos, currentMode, timeElapsed);
-
   // ✅ PERSISTENCE: Salvar configurações atuais
   saveGameSettings();
 
-  // ✅ ANIMAã‡ãƒO DE CONFETTI: Usar Função de sucesso COM confetti
-  showSuccessMessageWithConfetti(`Correto! +${pointsEarned} pontos`);
+  // ✅ FEEDBACK: Mostrar mensagem com streak
+  const streakMessage =
+    currentSession.streak > 1
+      ? `Correto! +${pointsEarned} pts | Streak: ${currentSession.streak}`
+      : `Correto! +${pointsEarned} pontos`;
+
+  showSuccessMessageWithConfetti(streakMessage);
 
   tentativaFeita = true;
 
@@ -900,7 +1057,7 @@ function handleCorrectAnswer() {
   }
 }
 
-// ✅ CORREã‡ãƒO: handleWrongAnswer no modo difícil com Animação
+// ✅ SISTEMA DE STREAK: handleWrongAnswer reformulado
 function handleWrongAnswer() {
   // Para o timer se estiver rodando
   if (currentMode === "4" && countdownInterval) {
@@ -908,14 +1065,35 @@ function handleWrongAnswer() {
     botaoPararTimer.disabled = true; // Desabilita o botão de parar
   }
 
+  // ========== SISTEMA DE STREAK ==========
+  // Salvar pontos acumulados no ranking se houver uma sessão ativa
+  if (currentSession.isActive && currentSession.points > 0) {
+    const timeElapsed = currentMode === "4" ? null : null; // TODO: implementar tempo para outros modos se necessário
+
+    // Salvar no ranking com dados da sessão
+    saveScoreToRanking(currentSession.points, currentMode, timeElapsed);
+
+    // Mostrar feedback de fim de sessão
+    showSessionEndFeedback(currentSession.points, currentSession.streak);
+
+    console.log(
+      `[Session] Salvando sessão: ${currentSession.points} pontos, streak de ${currentSession.streak}`
+    );
+  }
+
+  // Finalizar sessão atual
+  endCurrentSession();
+
   // ✅ PERSISTENCE: Atualizar estatísticas (0 pontos, resposta incorreta)
   updatePlayerStatistics(0, false);
 
   // ✅ PERSISTENCE: Salvar configurações atuais
   saveGameSettings();
 
-  // ✅ NOVA ANIMAã‡ãƒO: Usar Função de erro
-  showErrorMessage(`Errado! A resposta era ${mediaAtual}`);
+  // ✅ NOVA ANIMAã‡ãƒO: Usar Função de erro (só mostrar resposta correta se não houve feedback de sessão)
+  if (!currentSession.isActive || currentSession.points === 0) {
+    showErrorMessage(`Errado! A resposta era ${mediaAtual}`);
+  }
 
   tentativaFeita = true;
 
@@ -1267,7 +1445,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ PERSISTENCE: Carregar configurações e dados salvos
   loadGameSettings();
-  
+
   // ✅ PERSISTENCE: Aguardar que o StorageSystem seja inicializado e então atualizar rankings
   setTimeout(() => {
     updateRankingDisplay();

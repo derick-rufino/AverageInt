@@ -145,3 +145,32 @@ button:active {
 input {
   accent-color: var(--interactive-primary);
 }
+
+/* ========== SISTEMA DE STREAK ========== */
+
+/* Destacar rankings com streak alto */
+.rank-item.streak-highlight {
+  background: linear-gradient(
+    90deg,
+    var(--color-success-dark) 0%,
+    transparent 100%
+  );
+  border-left: 3px solid var(--color-success-base);
+  padding-left: 0.75rem;
+}
+
+.rank-item.streak-highlight .rank-points {
+  color: var(--color-success-base);
+  font-weight: 600;
+}
+
+/* Animação sutil para streaks */
+.rank-item.streak-highlight:hover {
+  background: linear-gradient(
+    90deg,
+    var(--color-success-dark) 0%,
+    var(--bg-tertiary) 100%
+  );
+  transform: translateX(2px);
+  transition: all 0.2s ease;
+}

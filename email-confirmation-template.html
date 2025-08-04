@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AverageInt - Confirmação de Email</title>
+    <style>
+        /* Import Google Fonts */
+        @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Pixelify+Sans:wght@400..700&display=swap");
+
+        /* CSS Variables - AverageInt Design System */
+        :root {
+            /* Cores Base */
+            --color-primary-500: #3b82f6;
+            --color-primary-600: #2563eb;
+            --color-accent-teal: #5eead4;
+            --color-success-base: #22c55e;
+
+            /* Backgrounds */
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #1a1f2e;
+            --bg-tertiary: #252a3a;
+
+            /* Text Colors */
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+
+            /* Borders */
+            --border-primary: rgba(148, 163, 184, 0.2);
+
+            /* Border Radius */
+            --radius-base: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+
+            /* Transitions */
+            --transition-standard: 0.15s ease-out;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Montserrat", Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* Email Container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Header */
+        .email-header {
+            background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-500) 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .email-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .logo-section {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-title {
+            font-family: "Pixelify Sans", monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+        }
+
+        /* Content */
+        .email-content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 1.25rem;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .main-message {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Confirmation Button */
+        .cta-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .confirm-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-500) 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition-standard);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confirm-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .confirm-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .confirm-button:hover::before {
+            left: 100%;
+        }
+
+        /* Security Notice */
+        .security-notice {
+            background-color: var(--bg-tertiary);
+            border-left: 4px solid var(--color-accent-teal);
+            padding: 20px;
+            border-radius: var(--radius-base);
+            margin: 30px 0;
+        }
+
+        .security-notice h3 {
+            font-family: "Pixelify Sans", monospace;
+            color: var(--color-accent-teal);
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .security-notice p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Game Stats Preview */
+        .game-preview {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(37, 42, 58, 0.8) 100%);
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            margin: 30px 0;
+            border: 1px solid var(--border-primary);
+        }
+
+        .game-preview h3 {
+            font-family: "Pixelify Sans", monospace;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 15px;
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-base);
+            border: 1px solid var(--border-primary);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .feature-desc {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Footer */
+        .email-footer {
+            background-color: var(--bg-primary);
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid var(--border-primary);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .footer-links {
+            margin: 20px 0;
+        }
+
+        .footer-link {
+            color: var(--color-accent-teal);
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 0.9rem;
+            transition: var(--transition-standard);
+        }
+
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+
+            .email-content {
+                padding: 30px 20px;
+            }
+
+            .email-header {
+                padding: 30px 20px;
+            }
+
+            .logo-title {
+                font-size: 2rem;
+            }
+
+            .confirm-button {
+                padding: 14px 28px;
+                font-size: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dark mode support for email clients */
+        @media (prefers-color-scheme: dark) {
+            .email-container {
+                background-color: var(--bg-secondary) !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <!-- Header com Logo -->
+        <div class="email-header">
+            <div class="logo-section">
+                <h1 class="logo-title">AverageInt</h1>
+                <p class="logo-subtitle">Desafio de Média Mental</p>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="email-content">
+            <h2 class="greeting">Olá! 👋</h2>
+
+            <div class="main-message">
+                <p>Bem-vindo ao <strong>AverageInt</strong>! Estamos animados para tê-lo(a) em nossa comunidade de
+                    jogadores que adoram desafios matemáticos.</p>
+
+                <p>Para completar seu cadastro e começar a jogar, confirme seu endereço de email clicando no botão
+                    abaixo:</p>
+            </div>
+
+            <!-- Botão de Confirmação -->
+            <div class="cta-section">
+                <a href="{{ .ConfirmationURL }}" class="confirm-button">
+                    ✅ Confirmar Email
+                </a>
+            </div>
+
+            <!-- Aviso de Segurança -->
+            <div class="security-notice">
+                <h3>🔐 Segurança</h3>
+                <p>Este link expira em <strong>24 horas</strong> por motivos de segurança. Se você não solicitou esta
+                    confirmação, pode ignorar este email com segurança.</p>
+            </div>
+
+            <!-- Preview do Jogo -->
+            <div class="game-preview">
+                <h3>🎮 O que te espera no AverageInt:</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Teste sua agilidade mental calculando a média de 4 números em diferentes modos de dificuldade!
+                </p>
+
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <span class="feature-icon">🎯</span>
+                        <div class="feature-title">4 Modos</div>
+                        <div class="feature-desc">Aprendiz ao Difícil</div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🏆</span>
+                        <div class="feature-title">Rankings</div>
+                        <div class="feature-desc">Compete globalmente</div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <div class="feature-title">Sistema Streak</div>
+                        <div class="feature-desc">Acertos consecutivos</div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">💡</span>
+                        <div class="feature-title">Dicas</div>
+                        <div class="feature-desc">Quando precisar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="email-footer">
+            <p class="footer-text">
+                Você está recebendo este email porque criou uma conta no AverageInt.
+            </p>
+
+            <div class="footer-links">
+                <a href="https://average-int.vercel.app/" class="footer-link">🎮 Jogar Agora</a>
+                <a href="https://average-int.vercel.app/suporte" class="footer-link">💬 Suporte</a>
+                <a href="https://average-int.vercel.app/privacidade" class="footer-link">🔒 Privacidade</a>
+            </div>
+
+            <p class="footer-text">
+                © 2025 AverageInt. Todos os direitos reservados.<br>
+                <small>Este é um email automático, por favor não responda.</small>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

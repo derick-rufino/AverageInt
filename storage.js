@@ -8,9 +8,9 @@
 const StorageSystem = {
   // Chaves de armazenamento
   STORAGE_KEYS: {
-    RANKINGS: 'averageint_rankings',
-    SETTINGS: 'averageint_settings', 
-    STATISTICS: 'averageint_statistics'
+    RANKINGS: "averageint_rankings",
+    SETTINGS: "averageint_settings",
+    STATISTICS: "averageint_statistics",
   },
 
   // Estrutura padrão dos dados
@@ -18,12 +18,12 @@ const StorageSystem = {
     return {
       rankings: {
         general: [],
-        timed: []
+        timed: [],
       },
       gameSettings: {
         currentMode: "2", // Normal por padrão
         soundEnabled: true,
-        lastPlayed: null
+        lastPlayed: null,
       },
       statistics: {
         totalGames: 0,
@@ -32,12 +32,12 @@ const StorageSystem = {
         bestStreak: 0,
         currentStreak: 0,
         gamesPerMode: {
-          "1": 0, // Aprendiz
-          "2": 0, // Normal
-          "3": 0, // Médio
-          "4": 0  // Difícil
-        }
-      }
+          1: 0, // Aprendiz
+          2: 0, // Normal
+          3: 0, // Médio
+          4: 0, // Difícil
+        },
+      },
     };
   },
 
@@ -48,12 +48,12 @@ const StorageSystem = {
    */
   isStorageAvailable() {
     try {
-      const test = '__storage_test__';
+      const test = "__storage_test__";
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
       return true;
     } catch (e) {
-      console.warn('[Storage] localStorage não disponível:', e);
+      console.warn("[Storage] localStorage não disponível:", e);
       return false;
     }
   },
@@ -64,7 +64,7 @@ const StorageSystem = {
   setItem(key, data) {
     try {
       if (!this.isStorageAvailable()) {
-        console.warn('[Storage] localStorage indisponível, dados não salvos');
+        console.warn("[Storage] localStorage indisponível, dados não salvos");
         return false;
       }
 
@@ -72,11 +72,11 @@ const StorageSystem = {
       localStorage.setItem(key, serializedData);
       return true;
     } catch (error) {
-      if (error.name === 'QuotaExceededError') {
-        console.error('[Storage] Cota de armazenamento excedida:', error);
+      if (error.name === "QuotaExceededError") {
+        console.error("[Storage] Cota de armazenamento excedida:", error);
         this.handleStorageQuotaExceeded();
       } else {
-        console.error('[Storage] Erro ao salvar dados:', error);
+        console.error("[Storage] Erro ao salvar dados:", error);
       }
       return false;
     }
@@ -88,7 +88,9 @@ const StorageSystem = {
   getItem(key, defaultValue = null) {
     try {
       if (!this.isStorageAvailable()) {
-        console.warn('[Storage] localStorage indisponível, usando dados padrão');
+        console.warn(
+          "[Storage] localStorage indisponível, usando dados padrão"
+        );
         return defaultValue;
       }
 
@@ -99,7 +101,7 @@ const StorageSystem = {
 
       return JSON.parse(item);
     } catch (error) {
-      console.warn('[Storage] Dados corrompidos detectados, resetando:', error);
+      console.warn("[Storage] Dados corrompidos detectados, resetando:", error);
       this.removeItem(key);
       return defaultValue;
     }
@@ -114,7 +116,7 @@ const StorageSystem = {
         localStorage.removeItem(key);
       }
     } catch (error) {
-      console.error('[Storage] Erro ao remover item:', error);
+      console.error("[Storage] Erro ao remover item:", error);
     }
   },
 
@@ -122,7 +124,7 @@ const StorageSystem = {
    * Limpa todos os dados do jogo
    */
   clearAllData() {
-    Object.values(this.STORAGE_KEYS).forEach(key => {
+    Object.values(this.STORAGE_KEYS).forEach((key) => {
       this.removeItem(key);
     });
   },
@@ -134,7 +136,7 @@ const StorageSystem = {
     try {
       // Tentar limpar dados mais antigos dos rankings
       const rankings = this.getRankings();
-      
+
       // Manter apenas top 10 em cada categoria
       if (rankings.general.length > 10) {
         rankings.general = rankings.general.slice(0, 10);
@@ -144,9 +146,9 @@ const StorageSystem = {
       }
 
       this.saveRankings(rankings);
-      console.info('[Storage] Dados antigos removidos para liberar espaço');
+      console.info("[Storage] Dados antigos removidos para liberar espaço");
     } catch (error) {
-      console.error('[Storage] Falha ao limpar dados antigos:', error);
+      console.error("[Storage] Falha ao limpar dados antigos:", error);
     }
   },
 
@@ -174,12 +176,12 @@ const StorageSystem = {
     try {
       const rankings = this.getRankings();
       const now = new Date().toISOString();
-      
+
       const scoreEntry = {
         id: this.generateUUID(),
         points: points,
         date: now,
-        mode: mode
+        mode: mode,
       };
 
       // Se tem tempo, é para o ranking cronometrado
@@ -206,7 +208,56 @@ const StorageSystem = {
       this.saveRankings(rankings);
       return true;
     } catch (error) {
-      console.error('[Storage] Erro ao adicionar pontuação:', error);
+      console.error("[Storage] Erro ao adicionar pontuação:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Adiciona pontuação de sessão com informações de streak
+   * Função específica para o sistema de pontuação contínua
+   */
+  addSessionScore(points, mode, streak = 0, sessionTime = null) {
+    try {
+      const rankings = this.getRankings();
+      const now = new Date().toISOString();
+
+      const scoreEntry = {
+        id: this.generateUUID(),
+        points: points,
+        date: now,
+        mode: mode,
+        streak: streak, // Nova propriedade para streak
+        sessionType: "streak", // Identificar como pontuação de sessão
+      };
+
+      // Se tem tempo de sessão, é para o ranking cronometrado
+      if (sessionTime !== null) {
+        scoreEntry.sessionTime = sessionTime;
+        rankings.timed.push(scoreEntry);
+        // Ordenar por pontos (desc) e depois por tempo (asc)
+        rankings.timed.sort((a, b) => {
+          if (b.points !== a.points) {
+            return b.points - a.points;
+          }
+          // Se ambos têm tempo, comparar
+          if (a.sessionTime && b.sessionTime) {
+            return this.compareTimeStrings(a.sessionTime, b.sessionTime);
+          }
+          return 0;
+        });
+        rankings.timed = rankings.timed.slice(0, 20);
+      } else {
+        rankings.general.push(scoreEntry);
+        rankings.general.sort((a, b) => b.points - a.points);
+        rankings.general = rankings.general.slice(0, 20);
+      }
+
+      this.saveRankings(rankings);
+      console.log(`[Storage] Sessão salva: ${points} pontos, streak ${streak}`);
+      return true;
+    } catch (error) {
+      console.error("[Storage] Erro ao salvar sessão:", error);
       return false;
     }
   },
@@ -215,12 +266,12 @@ const StorageSystem = {
    * Compara strings de tempo no formato MM:SS
    */
   compareTimeStrings(timeA, timeB) {
-    const [minA, secA] = timeA.split(':').map(Number);
-    const [minB, secB] = timeB.split(':').map(Number);
-    
+    const [minA, secA] = timeA.split(":").map(Number);
+    const [minB, secB] = timeB.split(":").map(Number);
+
     const totalA = minA * 60 + secA;
     const totalB = minB * 60 + secB;
-    
+
     return totalA - totalB;
   },
 
@@ -273,10 +324,10 @@ const StorageSystem = {
   updateGameStatistics(points, mode, wasCorrect) {
     try {
       const stats = this.getStatistics();
-      
+
       stats.totalGames++;
       stats.gamesPerMode[mode] = (stats.gamesPerMode[mode] || 0) + 1;
-      
+
       if (wasCorrect) {
         stats.totalPoints += points;
         stats.currentStreak++;
@@ -284,15 +335,17 @@ const StorageSystem = {
       } else {
         stats.currentStreak = 0;
       }
-      
+
       // Recalcular média
-      stats.averageScore = stats.totalGames > 0 ? 
-        Math.round(stats.totalPoints / stats.totalGames) : 0;
-      
+      stats.averageScore =
+        stats.totalGames > 0
+          ? Math.round(stats.totalPoints / stats.totalGames)
+          : 0;
+
       this.saveStatistics(stats);
       return stats;
     } catch (error) {
-      console.error('[Storage] Erro ao atualizar estatísticas:', error);
+      console.error("[Storage] Erro ao atualizar estatísticas:", error);
       return this.getStatistics();
     }
   },
@@ -303,11 +356,14 @@ const StorageSystem = {
    * Gera UUID simples para identificação de entradas
    */
   generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c == "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      }
+    );
   },
 
   /**
@@ -316,17 +372,21 @@ const StorageSystem = {
   formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   },
 
   /**
    * Inicializa o sistema de storage (chamado no carregamento da página)
    */
   initialize() {
-    console.info('[Storage] Inicializando sistema de persistência...');
-    
+    console.info("[Storage] Inicializando sistema de persistência...");
+
     if (!this.isStorageAvailable()) {
-      console.warn('[Storage] localStorage não disponível - modo offline limitado');
+      console.warn(
+        "[Storage] localStorage não disponível - modo offline limitado"
+      );
       return false;
     }
 
@@ -334,16 +394,16 @@ const StorageSystem = {
     if (!this.getItem(this.STORAGE_KEYS.RANKINGS)) {
       this.saveRankings(this.getDefaultData().rankings);
     }
-    
+
     if (!this.getItem(this.STORAGE_KEYS.SETTINGS)) {
       this.saveSettings(this.getDefaultData().gameSettings);
     }
-    
+
     if (!this.getItem(this.STORAGE_KEYS.STATISTICS)) {
       this.saveStatistics(this.getDefaultData().statistics);
     }
 
-    console.info('[Storage] Sistema de persistência inicializado com sucesso');
+    console.info("[Storage] Sistema de persistência inicializado com sucesso");
     return true;
   },
 
@@ -355,7 +415,7 @@ const StorageSystem = {
       rankings: this.getRankings(),
       settings: this.getSettings(),
       statistics: this.getStatistics(),
-      exportDate: new Date().toISOString()
+      exportDate: new Date().toISOString(),
     };
   },
 
@@ -369,16 +429,16 @@ const StorageSystem = {
       if (data.statistics) this.saveStatistics(data.statistics);
       return true;
     } catch (error) {
-      console.error('[Storage] Erro ao importar dados:', error);
+      console.error("[Storage] Erro ao importar dados:", error);
       return false;
     }
-  }
+  },
 };
 
 // Tornar disponível globalmente
 window.StorageSystem = StorageSystem;
 
 // Auto-inicializar quando o script for carregado
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   StorageSystem.initialize();
 });
