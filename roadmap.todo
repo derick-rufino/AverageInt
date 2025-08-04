@@ -57,7 +57,14 @@ Sistema de Pontuação & Rankings:
 	☐ Guardar os 5 pontos mais altos no localStorage e exibir nos rankings
 		☐ Guardar 5 sem timer (modos comuns)
 		☐ Guardar 5 com timer (modo difícil)
-	☐ Novos records devem ser comemorados e exibidos no final da rodada de acertos
+	✔ Novos records devem ser comemorados e exibidos no final da rodada de acertos @done
+
+Sistema de Áudio e Feedback: @done
+	✔ Implementar sistema de áudio básico com SimpleAudioSystem @done
+	✔ Adicionar arquivo de som newHighScore.wav para novos recordes @done
+	✔ Criar feedback específico para novo recorde: toast + som (sem confetti) @done
+	✔ Manter confetti apenas para acertos consecutivos (streak) @done
+	✔ Separar feedback de erro comum vs novo recorde no erro @done
 
 Cards de Compartilhamento:
 	☐ Criar cards visuais para pontuação e recordes

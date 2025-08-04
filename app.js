@@ -1,5 +1,59 @@
 ﻿// ========== BASIC FEEDBACK ==========
 
+// ========== AUDIO SYSTEM ==========
+
+class SimpleAudioSystem {
+  constructor() {
+    this.sounds = {};
+    this.enabled = true;
+    this.volume = 0.7;
+  }
+
+  preload(name, src) {
+    try {
+      this.sounds[name] = new Audio(src);
+      this.sounds[name].preload = "auto";
+      this.sounds[name].volume = this.volume;
+    } catch (error) {
+      console.warn(`[Audio] Falha ao carregar som: ${name}`, error);
+    }
+  }
+
+  play(name, volume = this.volume) {
+    if (!this.enabled || !this.sounds[name]) return;
+
+    try {
+      this.sounds[name].currentTime = 0; // Reset para permitir sobreposição
+      this.sounds[name].volume = volume;
+      this.sounds[name]
+        .play()
+        .catch((e) => console.warn(`[Audio] Falha ao reproduzir ${name}:`, e));
+    } catch (error) {
+      console.warn(`[Audio] Erro ao reproduzir som: ${name}`, error);
+    }
+  }
+
+  setVolume(volume) {
+    this.volume = Math.max(0, Math.min(1, volume));
+    Object.values(this.sounds).forEach((audio) => {
+      audio.volume = this.volume;
+    });
+  }
+
+  toggle() {
+    this.enabled = !this.enabled;
+    return this.enabled;
+  }
+}
+
+// Instância global do sistema de áudio
+const audioSystem = new SimpleAudioSystem();
+
+// Precarregar sons essenciais
+audioSystem.preload("newHighScore", "./public/soundfx/newHighScore.wav");
+
+// ========== END AUDIO SYSTEM ==========
+
 // ========== RANKING SYSTEM WITH PERSISTENCE ==========
 
 /**
@@ -129,48 +183,63 @@ function updateRankingTab(tabType, rankingData) {
 /**
  * Salva pontuação no ranking apropriado
  * Detecta automaticamente se é uma sessão com streak ou pontuação individual
+ * Retorna um objeto com informações sobre se foi um novo recorde
  */
 function saveScoreToRanking(points, mode, timeElapsed = null) {
   if (!window.StorageSystem) {
     console.warn("[Rankings] Sistema de storage não disponível");
-    return false;
+    return { success: false, isNewRecord: false };
   }
 
-  let success = false;
+  let result = { success: false, isNewRecord: false };
+
+  // Obter rankings atuais para verificar se é novo recorde
+  const currentRankings = StorageSystem.getRankings();
+  const isTimedMode = (mode === "4" && timeElapsed) || timeElapsed;
+  const relevantRanking = isTimedMode
+    ? currentRankings.timed
+    : currentRankings.general;
+
+  // Verificar se é novo recorde (se não há pontuações ou se os pontos são maiores que o primeiro lugar)
+  const isNewRecord =
+    !relevantRanking ||
+    relevantRanking.length === 0 ||
+    (relevantRanking[0] && points > relevantRanking[0].points);
 
   // Se há uma sessão ativa, usar o sistema de sessão
   if (currentSession.isActive && currentSession.streak > 0) {
-    success = StorageSystem.addSessionScore(
+    result.success = StorageSystem.addSessionScore(
       points,
       mode,
       currentSession.streak,
       timeElapsed
     );
 
-    if (success) {
+    if (result.success) {
       console.info(
         `[Rankings] Sessão salva: ${points} pontos, streak ${currentSession.streak}, modo ${mode}`
       );
     }
   } else {
     // Sistema tradicional para pontuações individuais
-    success = StorageSystem.addScore(points, mode, timeElapsed);
+    result.success = StorageSystem.addScore(points, mode, timeElapsed);
 
-    if (success) {
+    if (result.success) {
       console.info(
         `[Rankings] Pontuação individual salva: ${points} pontos no modo ${mode}`
       );
     }
   }
 
-  if (success) {
+  if (result.success) {
+    result.isNewRecord = isNewRecord;
     // Atualizar display imediatamente
     updateRankingDisplay();
   } else {
     console.error("[Rankings] Falha ao salvar pontuação");
   }
 
-  return success;
+  return result;
 }
 
 /**
@@ -953,6 +1022,26 @@ function showSessionEndFeedback(finalPoints, finalStreak) {
   }
 }
 
+/**
+ * Mostra feedback específico para novo recorde
+ */
+function showNewRecordFeedback(points, streak = null) {
+  const streakText =
+    streak && streak > 1 ? `<br>com ${streak} acertos consecutivos` : "";
+  const message = `🏆 NOVO RECORDE!<br>${points} pontos${streakText}!`;
+
+  // Toast notification para novo recorde
+  showSuccessToast(message, 5000); // 5 segundos de duração
+
+  // Tocar som de novo recorde
+  audioSystem.play("newHighScore", 0.8);
+
+  // Log para debug
+  console.info(
+    `[NewRecord] Novo recorde celebrado: ${points} pontos${streakText}`
+  );
+}
+
 // ✅ SISTEMA DE STREAK: handleCorrectAnswer reformulado
 function handleCorrectAnswer() {
   // Para o timer se estiver rodando
@@ -1065,24 +1154,25 @@ function handleWrongAnswer() {
     botaoPararTimer.disabled = true; // Desabilita o botão de parar
   }
 
+  let wasNewRecord = false;
+
   // ========== SISTEMA DE STREAK ==========
   // Salvar pontos acumulados no ranking se houver uma sessão ativa
   if (currentSession.isActive && currentSession.points > 0) {
-    const timeElapsed = currentMode === "4" ? null : null; // TODO: implementar tempo para outros modos se necessário
+    const timeElapsed = currentMode === "4" ? null : null;
 
     // Salvar no ranking com dados da sessão
-    saveScoreToRanking(currentSession.points, currentMode, timeElapsed);
-
-    // Mostrar feedback de fim de sessão
-    showSessionEndFeedback(currentSession.points, currentSession.streak);
+    const saveResult = saveScoreToRanking(
+      currentSession.points,
+      currentMode,
+      timeElapsed
+    );
+    wasNewRecord = saveResult.isNewRecord;
 
     console.log(
       `[Session] Salvando sessão: ${currentSession.points} pontos, streak de ${currentSession.streak}`
     );
   }
-
-  // Finalizar sessão atual
-  endCurrentSession();
 
   // ✅ PERSISTENCE: Atualizar estatísticas (0 pontos, resposta incorreta)
   updatePlayerStatistics(0, false);
@@ -1090,10 +1180,22 @@ function handleWrongAnswer() {
   // ✅ PERSISTENCE: Salvar configurações atuais
   saveGameSettings();
 
-  // ✅ NOVA ANIMAã‡ãƒO: Usar Função de erro (só mostrar resposta correta se não houve feedback de sessão)
-  if (!currentSession.isActive || currentSession.points === 0) {
+  // ✅ FEEDBACK PERSONALIZADO baseado em novo recorde
+  if (wasNewRecord) {
+    // Novo recorde: toast + som, SEM confetti
+    showNewRecordFeedback(currentSession.points, currentSession.streak);
+    // Mostrar também a resposta correta
+    showErrorMessage(`Errado! A resposta era ${mediaAtual}`);
+  } else if (currentSession.isActive && currentSession.points > 0) {
+    // Sessão normal sem novo recorde
+    showSessionEndFeedback(currentSession.points, currentSession.streak);
+  } else {
+    // Nenhuma sessão ativa - apenas mostrar resposta correta
     showErrorMessage(`Errado! A resposta era ${mediaAtual}`);
   }
+
+  // Finalizar sessão atual
+  endCurrentSession();
 
   tentativaFeita = true;
 
@@ -1124,7 +1226,9 @@ function handleWrongAnswer() {
       }
     }
 
-    userMessage.innerText = `❌ Errado! A resposta era ${mediaAtual} - Nova sequência...`;
+    if (!wasNewRecord) {
+      userMessage.innerText = `❌ Errado! A resposta era ${mediaAtual} - Nova sequência...`;
+    }
 
     // ✅ INICIAR Animação dos displays Após 1 segundo
     setTimeout(() => {
@@ -1137,7 +1241,9 @@ function handleWrongAnswer() {
       tentativaFeita = false;
       dicaUsada = false;
       dicasUsadasNaRodada = []; // Reset das dicas da rodada
-      userMessage.innerText = "";
+      if (!wasNewRecord) {
+        userMessage.innerText = "";
+      }
 
       enableGameControls();
       updateHintButtonState();
