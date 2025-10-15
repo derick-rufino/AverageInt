@@ -1,7 +1,7 @@
 ## AverageInt
 
 ### Visão geral  
-**AverageInt** é um minigame front-end simples, construída com HTML, CSS e JavaScript puro. Desenvolvida por Derick Rufino com apoio do Copilot, sua proposta é o jogador acertar calcular a média de 4 números inteiros aleatórios.
+**AverageInt** é um minigame front-end simples, construída com HTML, CSS e JavaScript puro. Desenvolvida por Derick Rufino com apoio do **Copilot** (o inverso também é válido em determinados arquivos kkkk), sua proposta é o jogador acertar calcular a média de 4 números inteiros aleatórios.
 
 ### Recursos principais  
 - Interface leve e dinâmica
@@ -13,14 +13,14 @@
 - `styles.css` — estilização minimalista e limpa  
 - `script.js` — lógica para ler valores, validar e calcular a média
 
-### Por que usar  
+### Por que foi criado  
 - Ideal para aprender lógica de manipulação de DOM e operações aritméticas  
 - Base leve e modular para aprimorar habilidades em JavaScript puro  
 - Boa demonstração de uso prático do Copilot em um projeto real
 
 ### Como usar  
 1. Visite o site: [AverageInt - Vercel](https://average-int.vercel.app/)
-2.  Clone o repositório e então abra o arquivo `index.html` no navegador 
+2. Clone o repositório e então abra o arquivo `index.html` no navegador 
 
 
 ### Image Preview
